@@ -37,7 +37,7 @@ function DetailsScreen({ route, navigation }: DetailsScreenProps): JSX.Element {
   const { scannedData, codeType, timestamp } = route.params;
   const parsedData = parseQRData(scannedData);
 
-  // Added share functionality
+  // share functionality
   const handleShare = async () => {
     try {
       await Share.share({

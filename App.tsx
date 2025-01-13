@@ -9,6 +9,7 @@ import MachineScreen from './screens/MachineScreen';
 import RawMaterialScreen from './screens/RawMaterialScreen';
 import Icon from 'react-native-vector-icons/Ionicons'; 
 
+// In App.tsx, modify RootStackParamList:
 export type RootStackParamList = {
   MainTabs: undefined;
   Home: undefined;
@@ -18,8 +19,16 @@ export type RootStackParamList = {
     codeType: string;
     timestamp: string;
   };
-  Machine: undefined;
-  "Raw Material": undefined;
+  Machine: { 
+    scannedData: string;
+    codeType: string;
+    timestamp: string;
+  };
+  "RawMaterial": { 
+    scannedData: string;
+    codeType: string;
+    timestamp: string;
+  };  
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -94,7 +103,6 @@ function App(): JSX.Element {
           options={{ headerShown: false }}
         />
         <Stack.Screen name="Scanner" component={ScannerScreen} />
-        <Stack.Screen name="Details" component={DetailsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

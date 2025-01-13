@@ -31,25 +31,26 @@ function ScannerScreen({ route, navigation }: ScannerScreenProps): JSX.Element {
     getPermission();
   }, [requestPermission]);
 
-  const codeScanner = useCodeScanner({
-    codeTypes: scannerType === 'QR' 
-      ? ['qr']
-      : ['ean-13', 'ean-8', 'code-128', 'upc-e', 'upc-a'],
-    // Added error handling in onCodeScanned
-    onCodeScanned: (codes: Code[]) => {
-      try {
-        if (codes.length > 0 && codes[0].value) {
-          navigation.navigate('Details', {
-            scannedData: codes[0].value,
-            codeType: codes[0].type,
-            timestamp: new Date().toLocaleString(),
-          });
-        }
-      } catch (error) {
-        console.error('Error scanning code:', error);
+  // In ScannerScreen.tsx, modify the codeScanner:
+const codeScanner = useCodeScanner({
+  codeTypes: scannerType === 'QR' 
+    ? ['qr']
+    : ['ean-13', 'ean-8', 'code-128', 'upc-e', 'upc-a'],
+  onCodeScanned: (codes: Code[]) => {
+    try {
+      if (codes.length > 0 && codes[0].value) {
+        // Navigate to Machine for QR codes, Raw Material for barcodes
+        navigation.navigate(scannerType === 'QR' ? 'Machine' : 'RawMaterial', {
+          scannedData: codes[0].value,
+          codeType: codes[0].type,
+          timestamp: new Date().toLocaleString(),
+        });
       }
-    },
-  });
+    } catch (error) {
+      console.error('Error scanning code:', error);
+    }
+  },
+});
 
   // Added loading state check
   if (isLoading) {

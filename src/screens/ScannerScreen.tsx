@@ -11,6 +11,7 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RouteProp} from '@react-navigation/native';
 import {RootStackParamList} from '../../App';
 import {getRawMaterialByBarcode} from '../services/rawMaterial';
+import {getMachineByQRCode} from '../services/Machine'; 
 
 type ScannerScreenProps = {
   route: RouteProp<RootStackParamList, 'Scanner'>;
@@ -47,24 +48,34 @@ function ScannerScreen({route, navigation}: ScannerScreenProps): JSX.Element {
         if (isProcessing) return; // Prevent multiple scans while processing
         if (codes.length > 0 && codes[0].value) {
           setIsProcessing(true);
-          const barcodeId = codes[0].value;
-
-          // Fetch raw material details
-          const rawMaterialData = await getRawMaterialByBarcode(barcodeId);
-
-          navigation.navigate('Details', {
-            scannedData: barcodeId,
-            codeType: codes[0].type,
-            timestamp: new Date().toLocaleString(),
-            rawMaterialDetails: rawMaterialData.data,
-          });
+          const scannedValue = codes[0].value;
+          console.log('hi')
+          if (scannerType === 'QR') {
+            // Fetch machine details
+            const machineData = await getMachineByQRCode(scannedValue);
+            navigation.navigate('QRDetails', {
+              scannedData: scannedValue,
+              codeType: codes[0].type,
+              timestamp: new Date().toLocaleString(),
+              machineDetails: machineData.data,
+            });
+          } else {
+            // Fetch raw material details
+            const rawMaterialData = await getRawMaterialByBarcode(scannedValue);
+            navigation.navigate('Details', {
+              scannedData: scannedValue,
+              codeType: codes[0].type,
+              timestamp: new Date().toLocaleString(),
+              rawMaterialDetails: rawMaterialData.data,
+            });
+          }
         }
       } catch (error: any) {
         console.error('Error scanning code:', error);
         Alert.alert(
           'Error',
           error.message ||
-            'Failed to fetch raw material details. Please try again.',
+            `Failed to fetch ${scannerType === 'QR' ? 'machine' : 'raw material'} details. Please try again.`,
           [{text: 'OK'}],
         );
       } finally {

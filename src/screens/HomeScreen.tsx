@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, View, TouchableOpacity, Text, Platform } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { RootStackParamList } from '../App';
+import { RootStackParamList } from '../../App';
 import MachineScreen from './MachineScreen';
 import RawMaterialScreen from './RawMaterialScreen';
 

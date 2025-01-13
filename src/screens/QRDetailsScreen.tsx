@@ -12,8 +12,8 @@ import {RouteProp} from '@react-navigation/native';
 import {RootStackParamList} from '../../App';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 
-type DetailsScreenProps = {
-  route: RouteProp<RootStackParamList, 'Details'>;
+type QRDetailsScreenProps = {
+  route: RouteProp<RootStackParamList, 'QRDetails'>;
   navigation: NativeStackNavigationProp<RootStackParamList>;
 };
 
@@ -40,7 +40,7 @@ function parseQRData(data: string): Record<string, string> {
   }
 }
 
-function DetailsScreen({route, navigation}: DetailsScreenProps): JSX.Element {
+function QRDetailsScreen({route, navigation}: QRDetailsScreenProps): JSX.Element {
   if (!route.params) {
     return (
       <View style={styles.centered}>
@@ -49,17 +49,19 @@ function DetailsScreen({route, navigation}: DetailsScreenProps): JSX.Element {
     );
   }
 
-  const {scannedData, codeType, timestamp, rawMaterialDetails} = route.params;
+  const {scannedData, codeType, timestamp, machineDetails} = route.params;
   const parsedData = parseQRData(scannedData);
 
   const handleShare = async () => {
     try {
-      const shareData = rawMaterialDetails
+      const shareData = machineDetails
         ? {
-            barcode: scannedData,
-            material: rawMaterialDetails.rawMaterial.name,
-            description: rawMaterialDetails.rawMaterial.description,
-            quantity: `${rawMaterialDetails.qty} ${rawMaterialDetails.rawMaterial.units}`,
+            qrCode: scannedData,
+            machineName: machineDetails.name,
+            machineType: machineDetails.machineType,
+            location: machineDetails.location,
+            identificationNo: machineDetails.identificationNo,
+            moulds: machineDetails.moulds?.map(m => m.mouldName),
             timestamp: timestamp,
           }
         : parsedData;
@@ -76,69 +78,91 @@ function DetailsScreen({route, navigation}: DetailsScreenProps): JSX.Element {
     }
   };
 
-  const renderRawMaterialDetails = () => {
-    if (!rawMaterialDetails) return null;
-
-    const {rawMaterial} = rawMaterialDetails;
+  const renderMachineDetails = () => {
+    if (!machineDetails) return null;
 
     return (
       <View style={styles.materialSection}>
-        <Text style={styles.sectionTitle}>Raw Material Details</Text>
+        <Text style={styles.sectionTitle}>Machine Details</Text>
 
         <View style={styles.infoSection}>
-          <Text style={styles.label}>Material Name:</Text>
-          <Text style={styles.value}>{rawMaterial.name}</Text>
+          <Text style={styles.label}>Machine Name:</Text>
+          <Text style={styles.value}>{machineDetails.name}</Text>
+        </View>
+
+        <View style={styles.infoSection}>
+          <Text style={styles.label}>Machine Type:</Text>
+          <Text style={styles.value}>{machineDetails.machineType}</Text>
         </View>
 
         <View style={styles.infoSection}>
           <Text style={styles.label}>Description:</Text>
-          <Text style={styles.value}>{rawMaterial.description}</Text>
+          <Text style={styles.value}>{machineDetails.description}</Text>
         </View>
 
         <View style={styles.infoSection}>
-          <Text style={styles.label}>Category:</Text>
-          <Text style={styles.value}>{rawMaterial.category}</Text>
+          <Text style={styles.label}>Capacity/Specifications:</Text>
+          <Text style={styles.value}>{machineDetails.capacityOrSpec}</Text>
         </View>
 
         <View style={styles.infoSection}>
-          <Text style={styles.label}>Part Number:</Text>
-          <Text style={styles.value}>{rawMaterial.partNo}</Text>
+          <Text style={styles.label}>Identification Number:</Text>
+          <Text style={styles.value}>{machineDetails.identificationNo}</Text>
         </View>
 
         <View style={styles.infoSection}>
-          <Text style={styles.label}>Quantity Details:</Text>
+          <Text style={styles.label}>Make:</Text>
+          <Text style={styles.value}>{machineDetails.make}</Text>
+        </View>
+
+        <View style={styles.infoSection}>
+          <Text style={styles.label}>Location:</Text>
+          <Text style={styles.value}>{machineDetails.location}</Text>
+        </View>
+
+        <View style={styles.infoSection}>
+          <Text style={styles.label}>Installation Date:</Text>
           <Text style={styles.value}>
-            {rawMaterialDetails.qty} {rawMaterial.units}
-            {rawMaterialDetails.usedQty !== undefined && (
-              <Text>
-                {'\n'}Used: {rawMaterialDetails.usedQty} {rawMaterial.units}
-              </Text>
-            )}
+            {new Date(machineDetails.InstallationOn).toLocaleDateString()}
           </Text>
         </View>
 
         <View style={styles.infoSection}>
-          <Text style={styles.label}>MRN Number:</Text>
-          <Text style={styles.value}>{rawMaterialDetails.mrnNo}</Text>
+          <Text style={styles.label}>Loading Capacity:</Text>
+          <Text style={styles.value}>{machineDetails.loadingCapacity}</Text>
         </View>
 
         <View style={styles.infoSection}>
-          <Text style={styles.label}>Stock Limits:</Text>
+          <Text style={styles.label}>Assembly Required:</Text>
           <Text style={styles.value}>
-            Min: {rawMaterial.minimumQuantity} {rawMaterial.units}
-            {'\n'}
-            Max: {rawMaterial.maxQuantity} {rawMaterial.units}
-            {'\n'}
-            Reorder at: {rawMaterial.reorderQuantity} {rawMaterial.units}
+            {machineDetails.assemblyBool ? 'Yes' : 'No'}
           </Text>
         </View>
 
-        {rawMaterial.rate && (
+        {machineDetails.remarks && (
           <View style={styles.infoSection}>
-            <Text style={styles.label}>Rate:</Text>
-            <Text style={styles.value}>₹{rawMaterial.rate}</Text>
+            <Text style={styles.label}>Remarks:</Text>
+            <Text style={styles.value}>{machineDetails.remarks}</Text>
           </View>
         )}
+
+        {machineDetails.moulds && machineDetails.moulds.length > 0 && (
+          <View style={styles.infoSection}>
+            <Text style={styles.label}>Associated Moulds:</Text>
+            {machineDetails.moulds.map((mould, index) => (
+              <Text key={mould.mouldId} style={styles.value}>
+                {index + 1}. {mould.mouldName}
+              </Text>
+            ))}
+          </View>
+        )}
+
+        <View style={styles.infoSection}>
+          <Text style={styles.label}>Last Updated:</Text>
+          <Text style={styles.value}>
+            {new Date(machineDetails.updatedAt).toLocaleString()}
+          </Text>
+        </View>
       </View>
     );
   };
@@ -148,9 +172,7 @@ function DetailsScreen({route, navigation}: DetailsScreenProps): JSX.Element {
       <View style={styles.card}>
         <View style={styles.header}>
           <Text style={styles.headerText}>
-            {rawMaterialDetails
-              ? 'Raw Material Details'
-              : 'Scanned Code Details'}
+            {machineDetails ? 'Machine Details' : 'Scanned QR Code Details'}
           </Text>
           <Text style={styles.timestamp}>{timestamp}</Text>
         </View>
@@ -161,14 +183,14 @@ function DetailsScreen({route, navigation}: DetailsScreenProps): JSX.Element {
         </View>
 
         <View style={styles.infoSection}>
-          <Text style={styles.label}>Barcode ID:</Text>
+          <Text style={styles.label}>QR Code:</Text>
           <Text style={styles.value} selectable={true}>
             {scannedData}
           </Text>
         </View>
 
-        {rawMaterialDetails
-          ? renderRawMaterialDetails()
+        {machineDetails
+          ? renderMachineDetails()
           : Object.entries(parsedData).map(([key, value]) => (
               <View key={key} style={styles.infoSection}>
                 <Text style={styles.label}>{key}:</Text>
@@ -188,10 +210,10 @@ function DetailsScreen({route, navigation}: DetailsScreenProps): JSX.Element {
           style={styles.button}
           onPress={() =>
             navigation.navigate('Scanner', {
-              scannerType: codeType.toLowerCase().includes('qr') ? 'QR' : 'Barcode',
+              scannerType: 'QR',
             })
           }>
-          <Text style={styles.buttonText}>Scan Another Code</Text>
+          <Text style={styles.buttonText}>Scan Another QR Code</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -279,4 +301,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default DetailsScreen;
+export default QRDetailsScreen;

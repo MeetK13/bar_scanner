@@ -2,9 +2,11 @@ import React from 'react';
 import { StyleSheet, View, TouchableOpacity, Text, Platform } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { RootStackParamList } from '../../App';
+import { RootStackParamList } from '../Navigator/StackNavigator';
 import MachineScreen from './MachineScreen';
 import RawMaterialScreen from './RawMaterialScreen';
+import { useLayoutEffect } from 'react';
+import { useAuth } from '../Context/AuthContext';
 
 type HomeScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Home'>;
@@ -13,6 +15,20 @@ type HomeScreenProps = {
 const Tab = createBottomTabNavigator();
 
 function HomeScreen({ navigation }: HomeScreenProps): JSX.Element {
+  const { logout } = useAuth();
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity
+          onPress={logout}
+          style={styles.logoutButton}
+        >
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation, logout]);
+
   return (
     <View style={styles.container}>
       <View style={styles.content}>
@@ -53,6 +69,14 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  logoutButton: {
+    marginLeft: 16,
+  },
+  logoutButtonText: {
+    color: '#007AFF',
     fontSize: 16,
     fontWeight: '600',
   },

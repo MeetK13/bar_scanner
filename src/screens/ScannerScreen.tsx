@@ -9,7 +9,7 @@ import {
 } from 'react-native-vision-camera';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RouteProp} from '@react-navigation/native';
-import {RootStackParamList} from '../../App';
+import {RootStackParamList} from '../Navigator/StackNavigator';
 import {getRawMaterialByBarcode} from '../services/rawMaterial';
 import {getMachineByQRCode} from '../services/Machine'; 
 
@@ -49,7 +49,7 @@ function ScannerScreen({route, navigation}: ScannerScreenProps): JSX.Element {
         if (codes.length > 0 && codes[0].value) {
           setIsProcessing(true);
           const scannedValue = codes[0].value;
-          console.log('hi')
+          // console.log('inside useCodeScanner')
           if (scannerType === 'QR') {
             // Fetch machine details
             const machineData = await getMachineByQRCode(scannedValue);

@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Share } from 'react-native';
 import { useRoute, RouteProp } from '@react-navigation/native';
-import { RootStackParamList } from '../../App';
+import { RootStackParamList } from '../Navigator/StackNavigator';
 
 
 type MachineScreenRouteProp = RouteProp<RootStackParamList, 'Machine'>;

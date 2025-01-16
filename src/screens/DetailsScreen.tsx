@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import {RouteProp} from '@react-navigation/native';
-import {RootStackParamList} from '../../App';
+import {RootStackParamList} from '../Navigator/StackNavigator';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 
 type DetailsScreenProps = {

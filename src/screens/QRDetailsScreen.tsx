@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   StyleSheet,
   Text,
@@ -6,11 +6,13 @@ import {
   ScrollView,
   TouchableOpacity,
   Share,
+  TextInput,
   ActivityIndicator,
 } from 'react-native';
 import {RouteProp} from '@react-navigation/native';
 import {RootStackParamList} from '../Navigator/StackNavigator';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import { Dropdown } from 'react-native-element-dropdown';
 
 type QRDetailsScreenProps = {
   route: RouteProp<RootStackParamList, 'QRDetails'>;
@@ -52,6 +54,18 @@ function QRDetailsScreen({route, navigation}: QRDetailsScreenProps): JSX.Element
   const {scannedData, codeType, timestamp, machineDetails} = route.params;
   const parsedData = parseQRData(scannedData);
 
+  //state to store selected mould and corresponding mould number
+  const [selectedMould, setSelectedMould] = useState<string | null>(null);
+  const [mouldNumber, setMouldNumber] = useState<string | null>(null);
+  const [operatorName, setOperatorName] = useState<string>('');
+  const [isFocus, setIsFocus] = useState(false);
+
+  const handleSubmit = () => {
+    // Handle form submission
+    console.log('Operator Name:', operatorName);
+    // Add logic here, such as sending data to a server, database, etc.
+  };
+
   const handleShare = async () => {
     try {
       const shareData = machineDetails
@@ -86,8 +100,62 @@ function QRDetailsScreen({route, navigation}: QRDetailsScreenProps): JSX.Element
         <Text style={styles.sectionTitle}>Machine Details</Text>
 
         <View style={styles.infoSection}>
-          <Text style={styles.label}>Machine Name:</Text>
-          <Text style={styles.value}>{machineDetails.name}</Text>
+        <Text style={styles.label}>M/C NO. / Name:</Text>
+        <TextInput
+          style={[styles.textBox, styles.uneditableTextInput]}
+          value={machineDetails.name}
+          editable={false} // Make it uneditable
+        />
+      </View>
+
+        <View style={styles.infoSection}>
+        <Text style={styles.label}>Mould Name:</Text>
+
+        <Dropdown
+          style={[styles.dropdown, isFocus && {borderColor: 'blue'}]}
+          placeholderStyle={styles.placeholderStyle}
+          selectedTextStyle={styles.selectedTextStyle}
+          inputSearchStyle={styles.inputSearchStyle}
+          data={machineDetails.moulds.map(mould => ({
+            label: mould.mouldName,
+            value: mould.mouldId,
+            number: mould.mouldNumber,
+          }))} // Transforming moulds into the format required by Dropdown
+          maxHeight={300}
+          labelField="label"
+          valueField="value"
+          placeholder={!isFocus ? 'Select Mould' : '...'}
+          value={selectedMould}
+          onFocus={() => setIsFocus(true)}
+          onBlur={() => setIsFocus(false)}
+          onChange={item => {
+            setSelectedMould(item.value);
+            setMouldNumber(item.number);
+            setIsFocus(false);
+          }}
+        />
+      </View>
+
+      {mouldNumber !== null && (
+        <View style={styles.infoSection}>
+          <Text style={styles.label}>Mould Number:</Text>
+          <TextInput
+            style={[styles.textBox, styles.uneditableTextInput]}
+            value={mouldNumber ? mouldNumber.toString() : 'Not Available'}
+            editable={false} // Make it uneditable
+          />
+        </View>
+      )}
+
+        <View style={styles.infoSection}>
+          <Text style={styles.label}>Operator Name:</Text>
+          <TextInput
+            style={[styles.textBox, styles.operatorInput]}  
+            value={operatorName}
+            onChangeText={setOperatorName}  // Updates the state when user types
+            placeholder="Enter Operator Name..."
+            placeholderTextColor="#000" 
+          />
         </View>
 
         <View style={styles.infoSection}>
@@ -201,6 +269,12 @@ function QRDetailsScreen({route, navigation}: QRDetailsScreenProps): JSX.Element
             ))}
 
         <TouchableOpacity
+          style={styles.button}
+          onPress={handleSubmit}>
+          <Text style={styles.buttonText}>Submit</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
           style={[styles.button, styles.shareButton]}
           onPress={handleShare}>
           <Text style={styles.buttonText}>Share</Text>
@@ -221,6 +295,41 @@ function QRDetailsScreen({route, navigation}: QRDetailsScreenProps): JSX.Element
 }
 
 const styles = StyleSheet.create({
+  textBox: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 10,
+    backgroundColor: '#D3D3D3',  // Light background for other inputs
+    color: '#333',
+  },
+  uneditableTextInput: {
+    color: '#333',
+    backgroundColor: '#f0f0f0',
+  },
+  operatorInput: {
+    backgroundColor: '#f5f5f5',  
+    color: '#fff',  
+  },
+  dropdown: {
+    height: 50,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+  },
+  placeholderStyle: {
+    fontSize: 16,
+    color: '#666',
+  },
+  selectedTextStyle: {
+    fontSize: 16,
+    color: '#333',
+  },
+  inputSearchStyle: {
+    height: 40,
+    fontSize: 16,
+  },
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',

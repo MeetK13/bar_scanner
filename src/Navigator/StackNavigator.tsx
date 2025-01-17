@@ -70,6 +70,7 @@ export type RootStackParamList = {
       moulds: Array<{
         mouldId: string;
         mouldName: string;
+        mouldNumber: string;
       }>;
     };
   };

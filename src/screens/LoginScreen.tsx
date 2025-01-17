@@ -93,6 +93,7 @@ console.log("before login", obj);
                 value={email}
                 style={{ paddingLeft: 17, flex: 1 }}
                 placeholder="E-Mail"
+                placeholderTextColor="black"
               />
             </View>
             <View style={styles.PortraitTextInput}>
@@ -100,9 +101,10 @@ console.log("before login", obj);
               <TextInput
                 onChangeText={setPassword}
                 value={password}
+                style={{ paddingLeft: 15, flex: 1, color: "black" }}
                 secureTextEntry={true}
-                style={{ paddingLeft: 15, flex: 1 }}
                 placeholder="Password"
+                placeholderTextColor="black"
               />
             </View>
             <Pressable onPress={handleLogin} style={styles.Bluebutton}>

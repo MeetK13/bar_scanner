@@ -12,12 +12,20 @@ import {
 import {RouteProp} from '@react-navigation/native';
 import {RootStackParamList} from '../Navigator/StackNavigator';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import { Dropdown } from 'react-native-element-dropdown';
+import { MultiSelect,Dropdown } from 'react-native-element-dropdown';
+import { QRRawMaterial } from '../services/QRRawMaterial';
 
 type QRDetailsScreenProps = {
   route: RouteProp<RootStackParamList, 'QRDetails'>;
   navigation: NativeStackNavigationProp<RootStackParamList>;
 };
+
+interface Material {
+  label: string;
+  value: string;
+}
+
+
 
 function parseQRData(data: string): Record<string, string> {
   try {
@@ -57,8 +65,27 @@ function QRDetailsScreen({route, navigation}: QRDetailsScreenProps): JSX.Element
   //state to store selected mould and corresponding mould number
   const [selectedMould, setSelectedMould] = useState<string | null>(null);
   const [mouldNumber, setMouldNumber] = useState<string | null>(null);
+  const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
+  const [rawMaterials, setRawMaterials] = useState<Material[]>([]);
   const [operatorName, setOperatorName] = useState<string>('');
   const [isFocus, setIsFocus] = useState(false);
+  const [loadingMaterials, setLoadingMaterials] = useState<boolean>(false); //for loading indecator
+
+  useEffect(() => {
+    const loadMaterials = async () => {
+      try {
+        setLoadingMaterials(true);
+        const response = await QRRawMaterial();
+        setRawMaterials(response.data);
+      } catch (error) {
+        console.error('Error fetching materials:', error);
+      } finally {
+        setLoadingMaterials(false);
+      }
+    };
+  
+    loadMaterials();
+  }, []); // Runs once when the component mounts
 
   const handleSubmit = () => {
     // Handle form submission
@@ -98,13 +125,14 @@ function QRDetailsScreen({route, navigation}: QRDetailsScreenProps): JSX.Element
     return (
       <View style={styles.materialSection}>
         <Text style={styles.sectionTitle}>Machine Details</Text>
+        <Text style={styles.timestamp}>{timestamp}</Text>
 
         <View style={styles.infoSection}>
         <Text style={styles.label}>M/C NO. / Name:</Text>
         <TextInput
           style={[styles.textBox, styles.uneditableTextInput]}
           value={machineDetails.name}
-          editable={false} // Make it uneditable
+          editable={false} // uneditable
         />
       </View>
 
@@ -147,6 +175,34 @@ function QRDetailsScreen({route, navigation}: QRDetailsScreenProps): JSX.Element
         </View>
       )}
 
+<Text style={styles.label}>Material</Text>
+        {loadingMaterials ? (
+          <ActivityIndicator size="small" color="#007AFF" />
+        ) : (
+          <MultiSelect
+            style={styles.dropdown}
+            data={rawMaterials} // fetching raw materials 
+            labelField="label"
+            valueField="value"
+            placeholder="Search items..."
+            searchPlaceholder="Search items..."
+            value={selectedMaterials}
+            onChange={items => setSelectedMaterials(items)}
+            renderSelectedItem={(item, unSelect) => (
+              <View style={styles.selectedItem}>
+                <Text>{item.label}</Text>
+                {unSelect && (
+                  <Text style={styles.removeText} onPress={() => unSelect(item)}>
+                    x
+                  </Text>
+                )}
+              </View>
+            )}
+            selectedStyle={styles.selectedItems}
+            search
+          />
+        )}
+
         <View style={styles.infoSection}>
           <Text style={styles.label}>Operator Name:</Text>
           <TextInput
@@ -158,63 +214,63 @@ function QRDetailsScreen({route, navigation}: QRDetailsScreenProps): JSX.Element
           />
         </View>
 
-        <View style={styles.infoSection}>
+        {/* <View style={styles.infoSection}>
           <Text style={styles.label}>Machine Type:</Text>
           <Text style={styles.value}>{machineDetails.machineType}</Text>
-        </View>
+        </View> */}
 
-        <View style={styles.infoSection}>
+        {/* <View style={styles.infoSection}>
           <Text style={styles.label}>Description:</Text>
           <Text style={styles.value}>{machineDetails.description}</Text>
-        </View>
+        </View> */}
 
-        <View style={styles.infoSection}>
+        {/* <View style={styles.infoSection}>
           <Text style={styles.label}>Capacity/Specifications:</Text>
           <Text style={styles.value}>{machineDetails.capacityOrSpec}</Text>
-        </View>
+        </View> */}
 
-        <View style={styles.infoSection}>
+        {/* <View style={styles.infoSection}>
           <Text style={styles.label}>Identification Number:</Text>
           <Text style={styles.value}>{machineDetails.identificationNo}</Text>
-        </View>
+        </View> */}
 
-        <View style={styles.infoSection}>
+        {/* <View style={styles.infoSection}>
           <Text style={styles.label}>Make:</Text>
           <Text style={styles.value}>{machineDetails.make}</Text>
-        </View>
+        </View> */}
 
-        <View style={styles.infoSection}>
+        {/* <View style={styles.infoSection}>
           <Text style={styles.label}>Location:</Text>
           <Text style={styles.value}>{machineDetails.location}</Text>
-        </View>
+        </View> */}
 
-        <View style={styles.infoSection}>
+        {/* <View style={styles.infoSection}>
           <Text style={styles.label}>Installation Date:</Text>
           <Text style={styles.value}>
             {new Date(machineDetails.InstallationOn).toLocaleDateString()}
           </Text>
-        </View>
+        </View> */}
 
-        <View style={styles.infoSection}>
+        {/* <View style={styles.infoSection}>
           <Text style={styles.label}>Loading Capacity:</Text>
           <Text style={styles.value}>{machineDetails.loadingCapacity}</Text>
-        </View>
+        </View> */}
 
-        <View style={styles.infoSection}>
+        {/* <View style={styles.infoSection}>
           <Text style={styles.label}>Assembly Required:</Text>
           <Text style={styles.value}>
             {machineDetails.assemblyBool ? 'Yes' : 'No'}
           </Text>
-        </View>
+        </View> */}
 
-        {machineDetails.remarks && (
+        {/* {machineDetails.remarks && (
           <View style={styles.infoSection}>
             <Text style={styles.label}>Remarks:</Text>
             <Text style={styles.value}>{machineDetails.remarks}</Text>
           </View>
-        )}
+        )} */}
 
-        {machineDetails.moulds && machineDetails.moulds.length > 0 && (
+        {/* {machineDetails.moulds && machineDetails.moulds.length > 0 && (
           <View style={styles.infoSection}>
             <Text style={styles.label}>Associated Moulds:</Text>
             {machineDetails.moulds.map((mould, index) => (
@@ -223,14 +279,14 @@ function QRDetailsScreen({route, navigation}: QRDetailsScreenProps): JSX.Element
               </Text>
             ))}
           </View>
-        )}
+        )} */}
 
-        <View style={styles.infoSection}>
+        {/* <View style={styles.infoSection}>
           <Text style={styles.label}>Last Updated:</Text>
           <Text style={styles.value}>
             {new Date(machineDetails.updatedAt).toLocaleString()}
           </Text>
-        </View>
+        </View> */}
       </View>
     );
   };
@@ -238,14 +294,14 @@ function QRDetailsScreen({route, navigation}: QRDetailsScreenProps): JSX.Element
   return (
     <ScrollView style={styles.container}>
       <View style={styles.card}>
-        <View style={styles.header}>
+        {/* <View style={styles.header}>
           <Text style={styles.headerText}>
             {machineDetails ? 'Machine Details' : 'Scanned QR Code Details'}
           </Text>
           <Text style={styles.timestamp}>{timestamp}</Text>
-        </View>
+        </View> */}
 
-        <View style={styles.infoSection}>
+        {/* <View style={styles.infoSection}>
           <Text style={styles.label}>Code Type:</Text>
           <Text style={styles.value}>{codeType}</Text>
         </View>
@@ -255,7 +311,7 @@ function QRDetailsScreen({route, navigation}: QRDetailsScreenProps): JSX.Element
           <Text style={styles.value} selectable={true}>
             {scannedData}
           </Text>
-        </View>
+        </View> */}
 
         {machineDetails
           ? renderMachineDetails()
@@ -295,12 +351,31 @@ function QRDetailsScreen({route, navigation}: QRDetailsScreenProps): JSX.Element
 }
 
 const styles = StyleSheet.create({
+  selectedItems: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 5,
+  },
+  selectedItem: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 14,
+    backgroundColor: '#ddd',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    margin: 3,
+  },
+  removeText: {
+    color: '#666',
+    paddingLeft: 10,
+  },
   textBox: {
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 8,
     padding: 10,
-    backgroundColor: '#D3D3D3',  // Light background for other inputs
+    backgroundColor: '#D3D3D3',
     color: '#333',
   },
   uneditableTextInput: {
@@ -308,8 +383,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
   },
   operatorInput: {
-    backgroundColor: '#f5f5f5',  
-    color: '#fff',  
+    backgroundColor: '#f5f5f5',
+    color: '#fff',
   },
   dropdown: {
     height: 50,
@@ -370,10 +445,8 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   materialSection: {
-    marginTop: 16,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
+    // Removed marginTop, paddingTop, and borderTopWidth
+    marginBottom: 12,
   },
   sectionTitle: {
     fontSize: 18,
